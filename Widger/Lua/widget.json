@@ -1,0 +1,11 @@
+{
+  "id": "simpleclock",
+  "name": "simpleclock",
+  "script": "robinhood_cards.lua",
+  "width": 220,
+  "height": 90,
+  "left": 80,
+  "top": 460,
+  "updateIntervalSeconds": 1,
+  "enabled": false
+}

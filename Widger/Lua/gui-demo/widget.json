@@ -1,0 +1,11 @@
+{
+  "id": "gui-demo",
+  "name": "GUI Demo",
+  "script": "main.lua",
+  "width": 240,
+  "height": 120,
+  "left": 120,
+  "top": 520,
+  "updateIntervalSeconds": 1,
+  "enabled": false
+}
