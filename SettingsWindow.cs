@@ -42,6 +42,7 @@ internal sealed class SettingsWindow : Window
     private readonly Slider _spotifySize;
     private readonly Slider _spotifyTitleScrollSpeed;
     private readonly ComboBox _weatherBackground;
+    private readonly ComboBox _launchOnStartup;
     private readonly Border _shell;
     private readonly WidgetConfig _value;
 
@@ -140,9 +141,11 @@ internal sealed class SettingsWindow : Window
         HookSpotifyLiveSettings();
 
         _textColor = TextBoxControl(_value.TextColor);
+        _launchOnStartup = EnabledDropdown(StartupHelper.IsEnabled());
         var appearanceSection = Section(
             "Appearance",
             "Shared widget color",
+            Field("Launch on startup", _launchOnStartup),
             Field("Text color (r,g,b)", _textColor)
         );
         content.Children.Add(appearanceSection);
@@ -366,6 +369,8 @@ internal sealed class SettingsWindow : Window
             {
                 _value.TextColor = _textColor.Text.Trim();
             }
+
+            StartupHelper.SetEnabled(_launchOnStartup.SelectedIndex == 0);
 
             DialogResult = true;
             Close();
@@ -1789,6 +1794,40 @@ internal sealed class SettingsWindow : Window
         List<string> Options);
 
     private sealed record LuaSettingBinding(string WidgetId, string Key, Control Control);
+}
+
+internal static class StartupHelper
+{
+    private const string RunKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
+    private const string ValueName = "WidgesDesktopDotNet";
+
+    internal static bool IsEnabled()
+    {
+        using var key = Registry.CurrentUser.OpenSubKey(RunKey, false);
+        return key?.GetValue(ValueName) != null;
+    }
+
+    internal static void SetEnabled(bool enabled)
+    {
+        using var key = Registry.CurrentUser.OpenSubKey(RunKey, true);
+        if (key == null)
+        {
+            return;
+        }
+
+        if (enabled)
+        {
+            var exePath = Environment.ProcessPath ?? System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
+            if (!string.IsNullOrEmpty(exePath))
+            {
+                key.SetValue(ValueName, $"\"{exePath}\"");
+            }
+        }
+        else
+        {
+            key.DeleteValue(ValueName, false);
+        }
+    }
 }
 
 internal static class NativeWindowEffects
